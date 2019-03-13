@@ -1,9 +1,11 @@
-package mindel;
-
-import lab5.store.*;
-import lab5.simulator.events.*;
+package lab5;
+import lab5.store.events.StoreClosing;
+import lab5.store.events.StoreStart;
 import lab5.simulator.Simulator;
 import lab5.simulator.EventQueue;
+import lab5.store.*;
+import lab5.simulator.events.*;
+
 /**
  * @author Mikael Granström, Erik Olausson, Sermed Mutter, Amir Rakshan
  *
@@ -12,18 +14,22 @@ import lab5.simulator.EventQueue;
  * Denna klass är huvudklassen. Den kör simuleringen och skapar dess instanser.
  *
  */
-public class Main {
-	
-	public static void main(String args[]) {
-		
-		StoreState state = new StoreState();
-		StoreView view = new StoreView(state);
-		EventQueue eventQueue=  new EventQueue();		
-		
-		state.isRunning = true;
-		view.printStart();
-		new Simulator(eventQueue, state);
-		view.printSummary();
-	}
+public class RunSim {
 
+	public static void main(String[] args) {
+	
+		
+		EventQueue eventQueue= new EventQueue();
+		StoreState storeState = new StoreState();
+		StoreView storeView = new StoreView(state);
+		eventQueue.addEvent(new StoreStart(Options.getSTARTTIME(), storeState, eventQueue));
+		eventQueue.addEvent(new StoreClosing(Options.getCLOSINGTIME(), storeState, eventQueue));
+		eventQueue.addEvent(new Stop(Options.getSTOPTIME(), storeState, eventQueue));
+		storeState.isRunning = true;
+		storeView.printFirst();
+		new Simulator(eventQueue, storeState);
+		storeView.printEnd();
+		
+	}
+	
 }
