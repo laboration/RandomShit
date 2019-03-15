@@ -1,7 +1,10 @@
+ 
 package lab5;
 
 import java.util.Random;
 import lab5.simulator.EventQueue;
+import lab5.store.Start;
+import lab5.store.Stop;
 import lab5.store.StoreState;
 import lab5.store.StoreView;
 import lab5.Options; //???
@@ -11,82 +14,88 @@ public class Optimize {
 	private static int missed;
 
 	public static void main(String[]args) {
-	
+		
+		//metod 2
 		int klar = metod_2();
-		System.out.println("B√§sta antalet kassor som minskar missade √§r" +missed +klar);
+		System.out.println("b‰sta antalet kassor som minskade ‰r: " + "(" + missed + ")" + " " +klar);
+		
+		//metod 3
+//		int klar = metod_3(1001010);
+//		System.out.println("B‰sta antalet kassor som minskade ‰r: " + "(" + missed + ")" + " " +klar);
+//		
+		// sim med optimala antal kassor.
+//		Options.setCashierMax(klar);
+//		StoreState storeState = new StoreState();;
+//		EventQueue eventQueue=  new EventQueue();		
+//		StoreView storeView = new StoreView(storeState);
+//		eventQueue.addEvent(new Start(Options.getStartTime(), storeState, eventQueue));
+//		eventQueue.addEvent(new Stop(Options.getStopTime(), storeState, eventQueue));
+//		storeState.flag = true;
+//		new Simulator(eventQueue, storeState);
+
 	}
 	
 	/**
-	 * metod_1() k√∂r en simulering d√§r alla parametrar √§r fixerade.
-	 * simuleringen √§r densamma som huvudprogrammet runsim
-	 * @return Sluttillst√•ndet state.
+	 * metod_1() kˆr en simulering d‰r alla parametrar ‰r fixerade.
+	 * simuleringen ‰r densamma som huvudprogrammet runsim
+	 * @return SluttillstÂndet state.
 	 */
 	public static StoreState metod_1() {
 		StoreState state = new StoreState();
-		StoreView view = new StoreView(state);
-		EventQueue eventQueue=  new EventQueue();		
+		EventQueue eventQueue=  new EventQueue();	
+		eventQueue.addEvent(new Start(Options.getStartTime(), state, eventQueue));
+		eventQueue.addEvent(new Stop(Options.getStopTime(),state,eventQueue));
 		
 		state.flag = true;
-		view.printStart();
 		new Simulator(eventQueue, state);
-		view.printSummary();
-		
+	
 		return state;
 	}
 
 	/**
-	 * Metod_2() ska genom flera k√∂rda simuleringar med hj√§lp av antal kassor minimera antalet missed 
-	 * antal missade √§r en avtagande funktion i antal kassor
+	 * Metod_2() ska genom flera kˆrda simuleringar med hj‰lp av antal kassor minimera antalet missed 
+	 * antal missade ‰r en avtagande funktion i antal kassor
 	 * @return optimerad antal kassor.
 	 */
 	public static int metod_2() {
-		int antalkassor = 0; // b√∂rjar med att s√§tta antal kassor = 0
-		int optimized = Integer.MAX_VALUE; // b√§sta antalet kassor
+		int antalkassor=0;//bˆrjar med att s‰tta antal kassor = 0
+		int optimized = Integer.MAX_VALUE; // l‰gsta antal missade kunder.
 
-		for (int i = 1; i<=Options.getCustomersMax(); i++) { // om st√∂rsta antalet m√§nniskor i aff√§ren => i
-			i = Options.getCashierMax(); // lika m√•nga kassor som maximalt ryms m√§nniskor
-			StoreState state = metod_1(); // anv√§nder metod 1 
-
-	//		if(state.getCustomersMissedCurrent() == 0) { // om ingen kund missas
-	//			antalkassor = i; // maximalt m‰nniskor som ryms 
-	//			missed = state.getCustomersMissedCurrent(); 
-	//			break;
-				 if (state.getCustomersMissedCurrent() < optimized ) {
-					 optimized = state.getCustomersMissedCurrent();
-					 antalkassor = i;
-			}else if(i >0.1*optimized + antalkassor && state.getCustomersMissedCurrent() == optimized) {
-				break;
-	//			optimized = state.getCustomersMissedCurrent();
-	//			antalkassor = i;
-	//			missed = state.getCustomersMissedCurrent();
+		for (int i = 1; i<=Options.getPeopleMax(); i++) { // om max antal m‰nniskor i aff‰ren => i
+			Options.setCashierMax(i); // ‰ndrar max antalet kassor till i
+			StoreState state = metod_1();  
+			if (state.getMissed() < optimized ) { // om antalet missade kunder < l‰ngsta antal missade kunder
+				optimized = state.getMissed();
+				antalkassor = i;
+			}else{
+				continue;
 			}
 		}
 		return antalkassor;
 	}
 	 /**
-	 * Metoden runnar metod_2() f√∂r att ta reda p√• b√§sta m√∂jliga antal kassor mha slumpm√§ssigt genererade tal .
-	 * @param seed f√∂r slumpm√§ssig generering.
-	 * @return b√§sta m√∂jliga antal kassor.
+	 * Metoden runnar metod_2() fˆrsˆker ta reda pÂ b‰sta mˆjliga antal kassor mha slumpm‰ssigt genererade frˆ .
+	 * @param seed fˆr slumpm‰ssig generering.
+	 * @return b‰sta mˆjliga antal kassor.
 	 */
-	public static int metod_3(long seed) { // tar fr√∂ som argument
+	public static int metod_3(long seed) { // tar frˆ som argument
 		Random fro = new Random(seed); //variabel av typen random
-		int calculator = 0; // loopar tills calc / antalet kassor √§r 1
-		int antal = 0; //antalet
+		int calculator = 0; // loopar tills calc ‰r 100
 		int maxantal = 0; //maxantalet
 		
 
 		while (true) {
-			if (calculator == 100) { // bryt loopen n√§r vi n√•r 100
+			if (calculator == 100) { // bryt loopen n‰r calc nÂr 100
 				break;
 			}
-			Options.seed = fro.nextInt(10000); // psuedorandom genererad int
-			antal = metod_2();	//metod 2 k√∂rs
+			Options.setSeed(fro.nextInt());// psuedorandom genererad int
+			int antal = metod_2();	
 
-			if(antal > maxantal) { //s√• l√§nge antalet √§r st√∂rre √§n maxantalet resetar vi calc till 0
+			if(antal > maxantal) { //sÂ l‰nge antal > maxantalet resetar vi calc till 0
 				maxantal = antal;
 				calculator = 0;
 			}else{
-				calculator++; // annars +1 tills vi n√•r 100
+				calculator++; // annars +1 tills vi nÂr 100
 			}
 		}
 		return maxantal;	// return maxantalet
